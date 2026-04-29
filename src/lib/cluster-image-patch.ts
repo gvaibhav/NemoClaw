@@ -78,12 +78,20 @@ export interface EnsurePatchedClusterImageOpts {
   inspectTimeoutMs?: number;
 }
 
+/** Parse a numeric env var, returning `fallback` when unset or non-finite. */
+function envInt(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw === "") return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.max(0, Math.round(n)) : fallback;
+}
+
 /** 10 minutes — generous for a slow registry, short enough to fail fast on a hung daemon. */
-export const DEFAULT_PULL_TIMEOUT_MS = 10 * 60 * 1000;
+export const DEFAULT_PULL_TIMEOUT_MS = envInt("NEMOCLAW_PULL_TIMEOUT_MS", 10 * 60 * 1000);
 /** 5 minutes — a one-layer apt-get build should complete in seconds. */
-export const DEFAULT_BUILD_TIMEOUT_MS = 5 * 60 * 1000;
+export const DEFAULT_BUILD_TIMEOUT_MS = envInt("NEMOCLAW_BUILD_TIMEOUT_MS", 5 * 60 * 1000);
 /** 30 seconds — `docker image inspect` against a healthy daemon is sub-second. */
-export const DEFAULT_INSPECT_TIMEOUT_MS = 30 * 1000;
+export const DEFAULT_INSPECT_TIMEOUT_MS = envInt("NEMOCLAW_INSPECT_TIMEOUT_MS", 30 * 1000);
 
 /**
  * Pinned digest for the `ubuntu:24.04` builder base image. The patched-image

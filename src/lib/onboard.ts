@@ -646,7 +646,9 @@ function pullAndResolveBaseImageDigest(): { digest: string; ref: string } | null
 function getStableGatewayImageRef(versionOutput: string | null = null): string | null {
   const version = getInstalledOpenshellVersion(versionOutput);
   if (!version) return null;
-  return `ghcr.io/nvidia/openshell/cluster:${version}`;
+  // Allow custom cluster image registry via NEMOCLAW_CLUSTER_IMAGE_REGISTRY
+  const registry = process.env.NEMOCLAW_CLUSTER_IMAGE_REGISTRY || "ghcr.io/nvidia/openshell";
+  return `${registry}/cluster:${version}`;
 }
 
 function getOpenshellBinary(): string {
@@ -3026,7 +3028,7 @@ function getGatewayStartEnv(): Record<string, string> {
   const gatewayEnv: Record<string, string> = {};
   const openshellVersion = getInstalledOpenshellVersion();
   const stableGatewayImage = openshellVersion
-    ? `ghcr.io/nvidia/openshell/cluster:${openshellVersion}`
+    ? `${process.env.NEMOCLAW_CLUSTER_IMAGE_REGISTRY || "ghcr.io/nvidia/openshell"}/cluster:${openshellVersion}`
     : null;
   if (stableGatewayImage && openshellVersion) {
     gatewayEnv.OPENSHELL_CLUSTER_IMAGE = stableGatewayImage;

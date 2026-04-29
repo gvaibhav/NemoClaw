@@ -24,6 +24,12 @@ trap _global_cleanup EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
+# Load environment overrides from .env file if present
+if [[ -f "${SCRIPT_DIR}/load-env.sh" ]]; then
+  # shellcheck source=scripts/load-env.sh
+  . "${SCRIPT_DIR}/load-env.sh"
+fi
+
 resolve_repo_root() {
   local base="${NEMOCLAW_REPO_ROOT:-$SCRIPT_DIR}"
   if [[ -f "${base}/package.json" ]]; then
@@ -1017,7 +1023,8 @@ install_nemoclaw() {
     rm -rf "$nemoclaw_src"
     mkdir -p "$(dirname "$nemoclaw_src")"
     NEMOCLAW_SOURCE_ROOT="$nemoclaw_src"
-    spin "Cloning NemoClaw source" git clone --depth 1 --branch "$release_ref" https://github.com/NVIDIA/NemoClaw.git "$nemoclaw_src"
+    local repo_url="${NEMOCLAW_REPO_URL:-https://github.com/NVIDIA/NemoClaw.git}"
+    spin "Cloning NemoClaw source" git clone --depth 1 --branch "$release_ref" "$repo_url" "$nemoclaw_src"
     # Fetch version tags into the shallow clone so `git describe --tags
     # --match "v*"` works at runtime (the shallow clone only has the
     # single ref we asked for).
@@ -1399,6 +1406,10 @@ except Exception:
   fi
 
   step 3 "Onboarding"
+  # Apply image registry overrides before onboarding
+  if [[ -f "${SCRIPT_DIR}/pre-onboard-hook.sh" ]]; then
+    bash "${SCRIPT_DIR}/pre-onboard-hook.sh" || warn "Pre-onboard hook failed (non-fatal)"
+  fi
   if command_exists nemoclaw; then
     if [[ -f "${HOME}/.nemoclaw/sandboxes.json" ]] && node -e '
       const fs = require("fs");
