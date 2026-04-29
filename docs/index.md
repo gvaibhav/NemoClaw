@@ -296,8 +296,8 @@ Release Notes <about/release-notes>
 :caption: Get Started
 :hidden:
 
+Prerequisites <get-started/prerequisites>
 Quickstart <get-started/quickstart>
-Windows Prerequisites <get-started/windows-setup>
 ```
 
 ```{toctree}
@@ -332,6 +332,7 @@ OpenClaw Controls <security/openclaw-controls>
 
 Deploy to a Remote GPU Instance <deployment/deploy-to-remote-gpu>
 Set Up Telegram <deployment/set-up-telegram-bridge>
+Install OpenClaw Plugins <deployment/install-openclaw-plugins>
 Sandbox Hardening <deployment/sandbox-hardening>
 ```
 
